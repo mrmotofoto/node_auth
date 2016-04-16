@@ -1,4 +1,5 @@
 var mongoose = require('mongoose');
+var bcrypt   = require('bcryptjs');
 
 mongoose.connect('mongodb://localhost/nodeauth');
 
@@ -27,7 +28,20 @@ var UserSchema = mongoose.Schema({
 var User = module.exports = mongoose.model('User', UserSchema);
 
 module.exports.createUser = function(newUser, callback) {
-    newUser.save(callback);
+    bcrypt.genSalt(10, function(err, salt) {
+        if(err) {
+            console.log("Error");
+        } else {
+            bcrypt.hash(newUser.password, salt, function(err, hash) {
+                if(err) {
+                    console.log('Error');
+                } else {
+                    newUser.password = hash;   
+                    newUser.save(callback);                 
+                }
+            });           
+        }
+    });
 }
 
 
